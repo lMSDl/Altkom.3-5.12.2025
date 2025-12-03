@@ -25,7 +25,7 @@
             return 15;
         }
 
-        public decimal CalculateOrderTotal(IEnumerable<decimal> itemPrices)
+        internal decimal CalculateOrderTotal(IEnumerable<decimal> itemPrices)
         {
             if (itemPrices == null)
                 throw new ArgumentNullException(nameof(itemPrices));
