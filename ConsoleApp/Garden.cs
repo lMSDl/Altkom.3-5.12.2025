@@ -1,6 +1,6 @@
 ﻿namespace ConsoleApp
 {
-    internal class Garden
+    public class Garden
     {
         public int Size { get; set; }
         private ICollection<string> Items { get; } = [];
