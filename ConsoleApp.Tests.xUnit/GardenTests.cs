@@ -1,4 +1,5 @@
 ﻿using AutoFixture;
+using ConsoleApp.Properties;
 
 namespace ConsoleApp.Tests.xUnit
 {
@@ -7,20 +8,20 @@ namespace ConsoleApp.Tests.xUnit
         //używanie metod setup i teardown w testach jednostkowych jest niezalecane,
         //ponieważ testy powinny być niezależne i nie powinny mieć efektów ubocznych.
         //metody setup i teardown są wywoływane przed i po KAŻDYM teście
-/*
-        Garden Garden { get; set; }
-        //xUnit nie posiada metod setup, ale możemy użyć konstruktora klasy testowej
-        public GardenTests()
-        {
-            Garden = new Garden(3);
-        }
+        /*
+                Garden Garden { get; set; }
+                //xUnit nie posiada metod setup, ale możemy użyć konstruktora klasy testowej
+                public GardenTests()
+                {
+                    Garden = new Garden(3);
+                }
 
-        // xUnit nie posiada metod teardown, ale możemy użyć metody Dispose
-        public void Dispose()
-        {
-            Garden = null;
-        }
-*/
+                // xUnit nie posiada metod teardown, ale możemy użyć metody Dispose
+                public void Dispose()
+                {
+                    Garden = null;
+                }
+        */
 
         //Zamiast setup/teardown możemy używać metod pomocniczych jak poniższa, któe są konfigurowalne w zależności od potrzeb testu
         private static Garden CreateGarden(int minimalValidSize)
@@ -58,7 +59,7 @@ namespace ConsoleApp.Tests.xUnit
             //opisujemy swoje intencje
             const int MINIMAL_VALID_SIZE = 0;
             //można wykorzysać AutoFixture do generowania danych testowych
-            string validName = new Fixture().Create<string>(); 
+            string validName = new Fixture().Create<string>();
             Garden garden = new Garden(MINIMAL_VALID_SIZE);
 
             //Act
@@ -68,9 +69,28 @@ namespace ConsoleApp.Tests.xUnit
             Assert.False(result);
         }
 
-        [Fact]
+        [Theory]
+        [InlineData(2, 3)]
+        [InlineData(4, 5)]
+        [InlineData(1, 2)]
+        public void Plant_WhenNameDuplicated_DuplicationCounterAddesToName(int numberOdCopies, int expectedCounter)
+        {
+            //Arrange
+            string duplicatedName = new Fixture().Create<string>();
+            string expectedName = duplicatedName + expectedCounter;
+            Garden garden = new Garden(expectedCounter);
+            //staramy się unikać pętli, jeśli już to używamy LINQ (unikamy wtedy logiki)
+            Enumerable.Repeat(duplicatedName, numberOdCopies).ToList().ForEach(_ => garden.Plant(duplicatedName));
+
+            //Act
+            _ = garden.Plant(duplicatedName);
+
+            //Assert
+            Assert.Contains(expectedName, garden.GetItems());
+        }
+
+        [Fact(Skip = "Replaced by Plant_DuplicatedName_DuplicationCounterAddedToName")]
         //public void Plant_ChangesNameWhenDuplicated()
-        //public void Plant_WhenNameDuplicated_DuplicationCounterAddesToName()
         public void Plant_DuplicatedName_ChangedName()
         {
             //Arrange
@@ -89,5 +109,106 @@ namespace ConsoleApp.Tests.xUnit
             //powinniśmy unikać asercji wielu rzeczy w jednym teście, więc nie łączymy tego testu z testem sprawdzającym czy metoda Plant zwraca true
         }
 
+        [Fact]
+        public void Plant_NullName_ArgumentNullException()
+        {
+            //Arrange
+            const int INSIGNIFICANT_SIZE = 0;
+            const string? NULL_NAME = null;
+            Garden garden = new Garden(INSIGNIFICANT_SIZE);
+            const string EXPECTED_PARAM_NAME = "item";
+
+            //Act
+            Action action = () => garden.Plant(NULL_NAME);
+
+            //Assert
+            //var argumentNullException = Assert.ThrowsAny<ArgumentException>(action); //uwzględnia wszystkie wyjątki dziedziczące po ArgumentException
+            var argumentNullException = Assert.Throws<ArgumentNullException>(action); //sprawdzamy konkretny typ wyjątku
+            Assert.Equal(EXPECTED_PARAM_NAME, argumentNullException.ParamName);
+        }
+
+        [Fact(Skip = "Replaced by Plant_EmptyName_ArgumentException")]
+        public void Plant_EmptyName_ArgumentException()
+        {
+            //Arrange
+            const int INSIGNIFICANT_SIZE = 0;
+            const string EMPTY_NAME = "";
+            Garden garden = new Garden(INSIGNIFICANT_SIZE);
+            const string EXPECTED_PARAM_NAME = "item";
+            string expectedMessageSubstring = Resources.emptyStringException;
+
+            //Act
+            var recordException = Record.Exception(() => garden.Plant(EMPTY_NAME));
+
+            //Assert
+            var argumentException = Assert.IsType<ArgumentException>(recordException); //sprawdzamy konkretny typ wyjątku
+            //Assert.Equal(EXPECTED_PARAM_NAME, argumentException.ParamName);
+            //Assert.Contains(expectedMessageSubstring, argumentException.Message);
+            AssertItemParameter(EXPECTED_PARAM_NAME, expectedMessageSubstring, argumentException);
+        }
+
+        /*public static IEnumerable<object[]> InvalidNames()
+        {
+            yield return new object[] { "" };
+            yield return new object[] { " " };
+            yield return new object[] { "\n" };
+            yield return new object[] { "\t" };
+            yield return new object[] { "\r" };
+            yield return new object[] { "\r\n\t " };
+            yield return new object[] { " " }; //#255
+        }*/
+
+
+        //Theory - testy z parametrami, które pozwalają na uruchomienie tej samej metody z różnymi danymi sprawdzającymi różne warunki (w tym brzegowe)
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")] //space
+        [InlineData("\t")]
+        [InlineData("\n")]
+        [InlineData("\r")]
+        [InlineData("\r\n\t ")]
+        [InlineData(" ")] //#255
+        //[MemberData(nameof(InvalidNames))]
+        //[ClassData(nameof(<nazwa_klasy>))] //klasa musi implementować IEnumerable<object[]>
+        public void Plant_EmptyOrWhitespaceName_ArgumentException(string invalidName)
+        {
+            //Arrange
+            const int INSIGNIFICANT_SIZE = 0;
+            Garden garden = new Garden(INSIGNIFICANT_SIZE);
+            const string EXPECTED_PARAM_NAME = "item";
+            string expectedMessageSubstring = Resources.emptyStringException;
+
+            //Act
+            var recordException = Record.Exception(() => garden.Plant(invalidName));
+
+            //Assert
+            var argumentException = Assert.IsType<ArgumentException>(recordException); //sprawdzamy konkretny typ wyjątku
+
+            //Assert.Equal(EXPECTED_PARAM_NAME, argumentException.ParamName);
+            //Assert.Contains(expectedMessageSubstring, argumentException.Message);
+            AssertItemParameter(EXPECTED_PARAM_NAME, expectedMessageSubstring, argumentException);
+        }
+
+        //metoda pomocnicza do asercji powtarzających się w testach
+        private static void AssertItemParameter(string expectedParamName, string expectedMessageSubstring, ArgumentException argumentException)
+        {
+            Assert.Equal(expectedParamName, argumentException.ParamName);
+            Assert.Contains(expectedMessageSubstring, argumentException.Message);
+        }
+
+        [Fact]
+        public void GetItems_ReturnsCopyOfPlantsCollection()
+        {
+            //Arrange
+            const int INSIGNIFICANT_SIZE = 0;
+            Garden garden = new Garden(INSIGNIFICANT_SIZE);
+            var items1 = garden.GetItems();
+
+            //Act
+            var items2 = garden.GetItems();
+
+            //Assert
+            Assert.NotSame(items1, items2); //sprawdzamy, czy to nie jest ta sama referencja
+        }
     }
 }

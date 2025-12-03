@@ -1,4 +1,6 @@
-﻿namespace ConsoleApp
+﻿using ConsoleApp.Properties;
+
+namespace ConsoleApp
 {
     public class Garden
     {
@@ -18,7 +20,7 @@
 
             if (string.IsNullOrWhiteSpace(item))
             {
-                throw new ArgumentException("Item cannot be empty or whitespace.", nameof(item));
+                throw new ArgumentException(Resources.emptyStringException, nameof(item));
             }
 
             if (Items.Count >= Size)
