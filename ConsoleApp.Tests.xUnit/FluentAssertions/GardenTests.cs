@@ -99,7 +99,7 @@ namespace ConsoleApp.Tests.xUnit.FluentAssertions
             using (new AssertionScope())
             {
                 action.Should().Throw<ArgumentException>()
-                    .WithMessage($"*{expectedMessageSubstring}")
+                    .WithMessage($"*{expectedMessageSubstring}*")
                     .And.ParamName.Should().Be(EXPECTED_PARAM_NAME);
             }
         }
