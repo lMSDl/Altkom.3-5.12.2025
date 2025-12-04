@@ -41,5 +41,23 @@
 
             return total;
         }
+
+        public event EventHandler<string>? DiscountApplied;
+
+        public decimal ApplyDiscount(decimal total, decimal discount)
+        {
+            if (discount > 0)
+            {
+                DiscountApplied?.Invoke(this, $"Applied discount: {discount} zł");
+            }
+
+            return total - discount;
+        }
+
+        public Task<decimal> SimulateRemoteDiscountFetchAsync(decimal baseAmount)
+        {
+            var discount = baseAmount > 100 ? 20 : 0;
+            return Task.FromResult(baseAmount - discount);
+        }
     }
 }
