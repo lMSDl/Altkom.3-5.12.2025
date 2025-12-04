@@ -6,6 +6,18 @@ namespace ConsoleApp.Tests.MSTest
     [TestClass]
     public class GardenTests
     {
+        /*[TestInitialize]
+        public void SetUp()
+        {
+
+        }
+
+        [TestCleanup]
+        public void TearDown()
+        {
+        }*/
+
+
         [TestMethod]
         public void Plant_ValidName_True()
         {

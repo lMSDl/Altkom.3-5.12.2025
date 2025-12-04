@@ -5,12 +5,22 @@ namespace ConsoleApp.Tests.NUnit
 {
     public class GardenTests
     {
+        /*[SetUp]
+        public void SetUp()
+        {
+        }
+
+        [TearDown] public void TearDown()
+        {
+        }*/
+
+
         [Test]
         public void Plant_ValidName_True()
         {
             //Arrange
-            const int MINIMAL_VALID_SIZE = 1; 
-            const string VALID_NAME = "none_empty_string"; 
+            const int MINIMAL_VALID_SIZE = 1;
+            const string VALID_NAME = "none_empty_string";
             Garden garden = new Garden(MINIMAL_VALID_SIZE);
 
             //Act
