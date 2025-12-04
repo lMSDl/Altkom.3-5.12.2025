@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="ConsoleApp.Tests.MSTest/ConsoleApp.Tests.MSTest.csproj" Id="9798992e-5d99-4ff6-ad72-46c8f62cda58" />
+  <Project Path="ConsoleApp.Tests.NUnit/ConsoleApp.Tests.NUnit.csproj" Id="861ac506-58b2-4f82-b9c5-b8945fc85e22" />
   <Project Path="ConsoleApp.Tests.xUnit/ConsoleApp.Tests.xUnit.csproj" />
   <Project Path="ConsoleApp/ConsoleApp.csproj" />
 </Solution>
