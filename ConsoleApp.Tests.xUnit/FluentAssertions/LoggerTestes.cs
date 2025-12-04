@@ -28,5 +28,25 @@ namespace ConsoleApp.Tests.xUnit.FluentAssertions
                 args.Timestamp.Should().BeCloseTo(DateTime.Now, TimeSpan.FromMilliseconds(10));
             }
         }
+
+        [Fact]
+        public void Log_AnyInput_ValidLoggerEventArgs_FA()
+        {
+            //Arrage
+            var logger = new Logger();
+            var log = new Fixture().Create<string>();
+            using var monitor = logger.Monitor();
+
+            //Act
+            logger.Log(log);
+
+            //Assert
+            using (new AssertionScope())
+            {
+                monitor.Should().Raise(nameof(logger.MessageLogged))
+                    .WithSender(logger)
+                    .WithArgs<Logger.LoggerEventArgs>(args => args.Message == log);
+            }
+        }
     }
 }
