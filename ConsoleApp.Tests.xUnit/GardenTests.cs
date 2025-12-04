@@ -1,5 +1,6 @@
 ﻿using AutoFixture;
 using ConsoleApp.Properties;
+using Moq;
 
 namespace ConsoleApp.Tests.xUnit
 {
@@ -201,7 +202,11 @@ namespace ConsoleApp.Tests.xUnit
         {
             //Arrange
             const int INSIGNIFICANT_SIZE = 0;
-            Garden garden = new Garden(INSIGNIFICANT_SIZE);
+
+            Mock<ILogger> loggerStub = new Mock<ILogger>();
+            //stub - obiekt, który nie ma żadnej logiki, ale jest wymagany przez konstruktor albo metodę
+            //od niego nie zależy wynik testu
+            Garden garden = new Garden(INSIGNIFICANT_SIZE, loggerStub.Object); //zakładamy, że Garden ma tylko konsturktor z 2 parametrami
             var items1 = garden.GetItems();
 
             //Act
@@ -209,6 +214,72 @@ namespace ConsoleApp.Tests.xUnit
 
             //Assert
             Assert.NotSame(items1, items2); //sprawdzamy, czy to nie jest ta sama referencja
+        }
+
+        [Fact]
+        public void Plant_ValidName_MessageLogged()
+        {
+            //Arrange
+            var fixture = new Fixture();
+            const int MINIMAL_VALID_SIZE = 1;
+            string validName = fixture.Create<string>();
+            Mock<ILogger> loggerMock = new Mock<ILogger>();
+
+            //loggerMock.Setup(x => x.Log(It.IsAny<string>())).Verifiable(Times.Exactly(2)); //It.IsAny<string>() - dowolny string
+            //loggerMock.Setup(x => x.Log(string.Format(Resources.PlantedInGarden, validName))).Verifiable();
+            loggerMock.Setup(x => x.Log(string.Format(Resources.PlantedInGarden, validName))).Verifiable(Times.Once);
+
+            Garden garden = new Garden(MINIMAL_VALID_SIZE, loggerMock.Object);
+
+            //Act
+            garden.Plant(validName);
+
+            //Assert
+            loggerMock.Verify();
+        }
+
+        [Fact]
+        public void Plant_DuplicatedName_MessageLogged()
+        {
+            //Arrange
+            var fixture = new Fixture();
+            const int MINIMAL_VALID_SIZE = 2;
+            string validName = fixture.Create<string>();
+            string duplicatedName = validName + "2";
+
+            Mock<ILogger> loggerMock = new Mock<ILogger>();
+            Garden garden = new Garden(MINIMAL_VALID_SIZE, loggerMock.Object);
+            garden.Plant(validName);
+
+            //Act
+            garden.Plant(validName);
+
+            //Assert
+
+            loggerMock.Verify(x => x.Log(string.Format(Resources.PlantNameChanged, validName, duplicatedName)), Times.Once);
+            //loggerMock.Verify(x => x.Log(It.Is<string>(s => s.Contains(validName))), Times.Exactly(3)); //It.Is<> - pozwala na bardziej zaawansowane dopasowanie parametrów
+            //loggerMock.Verify(x => x.Log(It.Is<string>(s => s.Contains(duplicatedName))), Times.Exactly(2));
+        }
+
+        [Fact]
+        public void GetLastLog_SingleLog()
+        {
+            //Arrange
+            var fixture = new Fixture();
+            const int INSIGNIFICANT_SIZE = 0;
+            var logs = fixture.CreateMany<string>(3).ToList();
+
+            Mock<ILogger> loggerMock = new Mock<ILogger>();
+            loggerMock.Setup(x => x.GetLogsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ReturnsAsync(string.Join("\n",logs));
+
+            Garden garden = new Garden(INSIGNIFICANT_SIZE, loggerMock.Object);
+
+            //Act
+            var result = garden.GetLastLog();
+
+            //Assert
+            Assert.Equal(logs.Last(), result);
         }
     }
 }

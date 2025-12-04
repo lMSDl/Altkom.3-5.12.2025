@@ -6,7 +6,12 @@ namespace ConsoleApp
     {
         public int Size { get; set; }
         private ICollection<string> Items { get; } = [];
+        private ILogger? Logger { get; }
 
+        public Garden(int size, ILogger logger) : this(size)
+        {
+            Logger = logger;
+        }
 
         public Garden(int size)
         {
@@ -15,6 +20,8 @@ namespace ConsoleApp
 
         public bool Plant(string item)
         {
+            Logger?.Log("Planting started");
+
             if (item is null)
                 throw new ArgumentNullException(nameof(item));
 
@@ -24,20 +31,32 @@ namespace ConsoleApp
             }
 
             if (Items.Count >= Size)
+            {
+                Logger?.Log(string.Format(Resources.NoSpaceInGardenFor, item));
                 return false;
+            }
 
             if (Items.Contains(item))
             {
-                item += Items.Count(x => x.StartsWith(item)) + 1;
+                string newItem = item + (Items.Count(x => x.StartsWith(item)) + 1);
+                Logger?.Log(string.Format(Resources.PlantNameChanged, item, newItem));
+                item = newItem;
             }
 
             Items.Add(item);
+            Logger?.Log(string.Format(Resources.PlantedInGarden, item));
             return true;
         }
 
         public IEnumerable<string> GetItems()
         {
             return Items.ToList();
+        }
+
+        public string? GetLastLog()
+        {
+            string? log = Logger?.GetLogsAsync(DateTime.Now.AddMinutes(-10), DateTime.Now).Result;
+            return log?.Split('\n').LastOrDefault();
         }
     }
 }
