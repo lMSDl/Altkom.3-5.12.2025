@@ -1,4 +1,5 @@
 ﻿using AutoFixture;
+using System.Globalization;
 
 namespace ConsoleApp.Tests.xUnit
 {
@@ -43,6 +44,31 @@ namespace ConsoleApp.Tests.xUnit
             Assert.NotNull(eventArgs);
             Assert.Equal(log, eventArgs!.Message);
             Assert.InRange(eventArgs!.Timestamp, dateTimeStart, dateTimeEnd);
+        }
+
+        [Fact]
+        public async Task GetLogAsync_ValidDateRange_LoggerMessage()
+        {
+            //Arrange
+            const int LOG_SPLIT_COUNT = 2;
+            const string EXPECTED_DATETIME_FORMAT = "dd.MM.yyyy HH:mm";
+            var logger = new Logger();
+            var log = new Fixture().Create<string>();
+
+            logger.Log(log);
+            var dateTimeStart = DateTime.Now;
+            logger.Log(log);
+            var dateTimeEnd = DateTime.Now;
+            logger.Log(log);
+
+            //Act
+            var result = await logger.GetLogsAsync(dateTimeStart, dateTimeEnd);
+
+            //Assert
+            var splitted = result.Split(": ");
+            Assert.Equal(LOG_SPLIT_COUNT, splitted.Length);
+            Assert.Equal(log, splitted[1]);
+            Assert.True(DateTime.TryParseExact(splitted[0], EXPECTED_DATETIME_FORMAT, CultureInfo.InvariantCulture, DateTimeStyles.None, out _));
         }
     }
 }
