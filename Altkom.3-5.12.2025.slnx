@@ -3,4 +3,5 @@
   <Project Path="ConsoleApp.Tests.NUnit/ConsoleApp.Tests.NUnit.csproj" Id="861ac506-58b2-4f82-b9c5-b8945fc85e22" />
   <Project Path="ConsoleApp.Tests.xUnit/ConsoleApp.Tests.xUnit.csproj" />
   <Project Path="ConsoleApp/ConsoleApp.csproj" />
+  <Project Path="Shop/Shop.csproj" Id="4919a95b-3ce6-49e9-9f16-4565120267a7" />
 </Solution>
