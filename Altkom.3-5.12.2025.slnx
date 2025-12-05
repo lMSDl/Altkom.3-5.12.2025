@@ -5,6 +5,8 @@
   <Project Path="ConsoleApp/ConsoleApp.csproj" />
   <Project Path="Shop.Tests/Shop.Tests.csproj" Id="e14279a0-027b-4bac-ad90-4f07d8c1865b" />
   <Project Path="Shop/Shop.csproj" Id="4919a95b-3ce6-49e9-9f16-4565120267a7" />
+  <Project Path="TDD.Tests/TDD.Tests.csproj" Id="e9b28818-0f7c-4c6f-9ace-c906ab04680e" />
+  <Project Path="TDD/TDD.csproj" Id="0a5fa9f4-b09b-4d5e-8584-99b1e11b02d8" />
   <Project Path="WebAPI.Tests.Unit/WebAPI.Tests.Unit.csproj" Id="ac394086-7f5b-46ba-a720-54a074cf36b0" />
   <Project Path="WebAPI/WebAPI.csproj" Id="87fb2d7a-88f3-4b84-8f67-4173bffcb5b8" />
 </Solution>
